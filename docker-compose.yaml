@@ -1,0 +1,40 @@
+version: '3'
+services:
+  mysql:
+    container_name: v-mysql
+    image: mysql/mysql-server:5.7
+    environment:
+      MYSQL_DATABASE: hello_world
+      # Password for root access
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_HOST: '%'
+    expose:
+      - "3306"
+    restart: always
+
+  hello_world_test:
+    build: ./hello-world
+    working_dir: /hello-world
+    volumes:
+      - ./hello-world:/hello-world
+      - ~/.m2:/root/.m2
+    command: mvn clean verify
+    depends_on:
+      - mysql
+
+  hello_world:
+    restart: always
+    build: ./hello-world
+    working_dir: /hello-world
+    volumes:
+      - ./hello-world:/hello-world
+      - ~/.m2:/root/.m2
+    expose:
+      - "8880"
+    ports:
+      - "9999:8880"
+    command: mvn clean spring-boot:run
+    depends_on:
+      - mysql
